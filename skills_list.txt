@@ -1,0 +1,195 @@
+python
+python 3
+c
+c++
+c#
+java
+javascript
+js
+typescript
+ts
+html
+css
+sql
+mysql
+postgresql
+mongodb
+firebase
+oracle
+bash
+shell
+powershell
+react
+reactjs
+react native
+redux
+vue
+vuejs
+angular
+angularjs
+nextjs
+node
+nodejs
+express
+expressjs
+django
+flask
+fastapi
+spring
+spring boot
+tailwind
+bootstrap
+material ui
+mui
+pandas
+numpy
+matplotlib
+seaborn
+scikit learn
+sklearn
+tensorflow
+pytorch
+keras
+nlp
+natural language processing
+deep learning
+machine learning
+ml
+artificial intelligence
+ai
+computer vision
+cv
+opencv
+data science
+data analysis
+data engineering
+big data
+hadoop
+spark
+git
+github
+gitlab
+docker
+kubernetes
+k8s
+jenkins
+jira
+slack
+notion
+trello
+linux
+windows
+unix
+macos
+aws
+amazon web services
+azure
+microsoft azure
+gcp
+google cloud platform
+google cloud
+powerbi
+tableau
+excel
+visual studio
+vscode
+vs code
+api
+rest
+restful api
+graphql
+soap
+oop
+object oriented programming
+microservices
+unit testing
+integration testing
+jest
+mocha
+cypress
+playwright
+cucumber
+agile
+scrum
+kanban
+ci
+cd
+continuous integration
+continuous delivery
+data visualization
+statistics
+sas
+r
+php
+perl
+ruby
+ruby on rails
+go
+golang
+typescript
+html5
+css3
+networking
+cybersecurity
+blockchain
+solidity
+smart contracts
+postgres
+sqlite
+d3.js
+redux toolkit
+svelte
+sveltekit
+express.js
+rest api
+cloud computing
+aws lambda
+firebase firestore
+firebase realtime database
+figma
+adobe xd
+jira
+confluence
+airflow
+etl
+data warehouse
+snowflake
+redshift
+looker
+bigquery
+sql server
+terraform
+ansible
+puppet
+chef
+grpc
+grpc services
+nosql
+json
+xml
+yaml
+toml
+csv
+excel
+pip
+conda
+jupyter
+jupyter notebook
+colab
+google colab
+restful services
+devops
+kibana
+elasticsearch
+logstash
+python
+javascript
+react
+node.js
+sql
+nosql
+aws
+docker
+kubernetes
+tensorflow
+pytorch
