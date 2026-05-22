@@ -2,6 +2,7 @@
 import os
 import tempfile
 import traceback
+from functools import wraps
 from pathlib import Path
 
 # 2. Third-party imports
@@ -16,7 +17,28 @@ from job_matcher import calculate_fit_batch
 
 # 4. Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+
+# Restrict CORS to known origins only
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://job-recommendation-backend-4gfp.onrender.com",
+            "http://localhost:8080"
+        ]
+    }
+})
+
+# API Key security setup
+ML_API_KEY = os.environ.get("ML_API_KEY", "")
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        key = request.headers.get("X-API-Key", "")
+        if key != ML_API_KEY or not ML_API_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 # 5. Configuration setup
 BASE_DIR = Path(__file__).parent.resolve()
@@ -40,6 +62,7 @@ def download_resume(filename):
 
 # 7. Analytics dashboard endpoint
 @app.route('/analytics_dashboard', methods=['POST'])
+@require_api_key
 def analytics_dashboard():
     try:
         data = request.json
@@ -101,6 +124,7 @@ def analytics_dashboard():
 
 # 8. Resume parsing endpoint with enhanced error handling
 @app.route('/parse_resume', methods=['POST'])
+@require_api_key
 def parse_resume_route():
     if 'resume' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
@@ -143,6 +167,7 @@ def parse_resume_route():
 
 # 9. Job matching endpoint
 @app.route('/match_jobs', methods=['POST'])
+@require_api_key
 def match_jobs():
     try:
         data = request.json
@@ -182,8 +207,6 @@ if __name__ == '__main__':
     # Production ready port, debug disabled for scalability
     app.run(host='0.0.0.0', port=5001, debug=False)
 
-
-
 @app.route("/")
 def home():
-    return jsonify({"message": "ML Project is running successfully!"})    
+    return jsonify({"message": "ML Project is running successfully!"})
