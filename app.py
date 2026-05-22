@@ -5,6 +5,16 @@ import traceback
 from functools import wraps
 from pathlib import Path
 
+# Load local .env file if it exists
+env_path = Path(__file__).parent / ".env"
+if env_path.exists():
+    with open(env_path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, val = line.split("=", 1)
+                os.environ[key.strip()] = val.strip().strip('"').strip("'")
+
 # 2. Third-party imports
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
