@@ -97,11 +97,18 @@ def analytics_dashboard():
             idx = min(int(score // 20), 4)
             histogram_bins[idx] += 1
 
+        # Group applications by jobId to avoid nested O(N*M) linear search
+        apps_by_job = {}
+        for app in applications:
+            j_id = str(app.get('jobId', ''))
+            if j_id:
+                apps_by_job.setdefault(j_id, []).append(app)
+
         # Growth predictions
         predictions = {}
         for job in jobs:
             job_id = str(job.get('_id', ''))
-            job_apps = [app for app in applications if app.get('jobId') == job_id]
+            job_apps = apps_by_job.get(job_id, [])
             if len(job_apps) >= 2:
                 try:
                     days = np.array([

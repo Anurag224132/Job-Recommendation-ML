@@ -12,12 +12,12 @@ import spacy.cli
 
 # 3. Try to load spaCy model or download if not found
 try:
-    # Re-enable NER for organization and date extraction
-    nlp = spacy.load("en_core_web_sm", disable=["parser"])
+    # Disable parser, tagger, lemmatizer, and attribute_ruler to optimize speed/memory
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "tagger", "lemmatizer", "attribute_ruler"])
 except OSError:
     print("Downloading spaCy model 'en_core_web_sm'...")
     spacy.cli.download("en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm", disable=["parser"])
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "tagger", "lemmatizer", "attribute_ruler"])
 
 # 4. Organization validation function
 def is_valid_org(text):
