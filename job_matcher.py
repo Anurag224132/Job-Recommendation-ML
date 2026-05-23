@@ -5,31 +5,32 @@ import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# 3. Skill normalization function with more comprehensive handling
+# 3. Pre-compiled regular expression variations and collapse patterns
+RE_COLLAPSE_SPACES = re.compile(r'\s+')
+
+VARIATION_PATTERNS = {
+    re.compile(r'c\s*#'): 'c#',
+    re.compile(r'c\s*\+\+'): 'c++',
+    re.compile(r'\.\s*net'): '.net',
+    re.compile(r'\bjs\b'): 'javascript',
+    re.compile(r'\bts\b'): 'typescript',
+    re.compile(r'\bai\b'): 'artificial intelligence',
+    re.compile(r'\bml\b'): 'machine learning',
+    re.compile(r'\bcv\b'): 'computer vision',
+    re.compile(r'\baws\b'): 'amazon web services',
+    re.compile(r'\bgcp\b'): 'google cloud platform'
+}
+
 def normalize_skill(skill):
     """Normalize skill names by removing spaces around special characters"""
     if not isinstance(skill, str):
         return ""
         
     skill = skill.lower().strip()
-    skill = re.sub(r'\s+', ' ', skill)  # Collapse multiple spaces
+    skill = RE_COLLAPSE_SPACES.sub(' ', skill)  # Collapse multiple spaces
     
-    # Handle common skill variations
-    variations = {
-        r'c\s*#': 'c#',
-        r'c\s*\+\+': 'c++',
-        r'\.\s*net': '.net',
-        r'\bjs\b': 'javascript',
-        r'\bts\b': 'typescript',
-        r'\bai\b': 'artificial intelligence',
-        r'\bml\b': 'machine learning',
-        r'\bcv\b': 'computer vision',
-        r'\baws\b': 'amazon web services',
-        r'\bgcp\b': 'google cloud platform'
-    }
-    
-    for pattern, replacement in variations.items():
-        skill = re.sub(pattern, replacement, skill)
+    for pattern, replacement in VARIATION_PATTERNS.items():
+        skill = pattern.sub(replacement, skill)
     
     return skill
 
