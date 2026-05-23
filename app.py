@@ -28,13 +28,17 @@ from job_matcher import calculate_fit_batch
 # 4. Initialize Flask app
 app = Flask(__name__)
 
-# Restrict CORS to known origins only
+# Integrate with Gunicorn logging if running in production (WSGI)
+if __name__ != '__main__':
+    import logging
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
+# Enable CORS for all origins because frontend calls ML service directly (with API Key validation)
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "https://job-recommendation-backend-4gfp.onrender.com",
-            "http://localhost:8080"
-        ]
+        "origins": "*"
     }
 })
 
@@ -45,7 +49,12 @@ def require_api_key(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         key = request.headers.get("X-API-Key", "")
-        if key != ML_API_KEY or not ML_API_KEY:
+        app.logger.info(f"🔑 API Key validation: received key length {len(key)}")
+        if not ML_API_KEY:
+            app.logger.warning("⚠️ API Key validation failed: ML_API_KEY is not configured in the environment variables.")
+            return jsonify({"error": "Unauthorized"}), 401
+        if key != ML_API_KEY:
+            app.logger.warning(f"❌ API Key validation failed: key mismatch. Expected length {len(ML_API_KEY)} but received {len(key)}.")
             return jsonify({"error": "Unauthorized"}), 401
         return f(*args, **kwargs)
     return decorated
@@ -143,20 +152,25 @@ def analytics_dashboard():
 @app.route('/parse_resume', methods=['POST'])
 @require_api_key
 def parse_resume_route():
+    app.logger.info("📄 Received request to /parse_resume")
     if 'resume' not in request.files:
+        app.logger.warning("❌ No resume file in request.files")
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['resume']
     if file.filename == '':
+        app.logger.warning("❌ Resume filename is empty")
         return jsonify({'error': 'No selected file'}), 400
 
     # Validate file extension
     allowed_extensions = {'.pdf', '.docx', '.txt'}
     file_ext = os.path.splitext(file.filename)[1].lower()
     if file_ext not in allowed_extensions:
+        app.logger.warning(f"❌ Unsupported file type extension: {file_ext}")
         return jsonify({'error': 'Unsupported file type'}), 400
 
     try:
+        app.logger.info(f"📂 Saving uploaded file: {file.filename} (extension: {file_ext})")
         # Save to temporary file with proper extension
         with tempfile.NamedTemporaryFile(
             delete=False,
@@ -168,9 +182,12 @@ def parse_resume_route():
 
         # Verify file was saved correctly
         if not os.path.exists(temp_path) or os.path.getsize(temp_path) == 0:
+            app.logger.error("❌ File saved but size is 0 or path does not exist")
             return jsonify({'error': 'File upload failed'}), 400
 
+        app.logger.info(f"🔍 Parsing resume file of size: {os.path.getsize(temp_path)} bytes")
         parsed_data = parse_resume(temp_path)
+        app.logger.info(f"✅ Resume parsed successfully. Extracted {len(parsed_data.get('skills', []))} skills.")
         return jsonify(parsed_data)
     except Exception as e:
         app.logger.error(f"Resume parsing error: {e}\n{traceback.format_exc()}")
@@ -186,10 +203,12 @@ def parse_resume_route():
 @app.route('/match_jobs', methods=['POST'])
 @require_api_key
 def match_jobs():
+    app.logger.info("💼 Received request to /match_jobs")
     try:
         data = request.json
         resume_skills = data.get('skills', [])
         jobs = data.get('jobs', [])
+        app.logger.info(f"🔍 Matching {len(resume_skills)} resume skills against {len(jobs)} jobs")
 
         # Prepare batch of required skills
         job_list_skills = [job.get('requiredSkills', []) if isinstance(job, dict) else [] for job in jobs]
@@ -211,19 +230,23 @@ def match_jobs():
             })
 
         if not results:
+            app.logger.warning("⚠️ No valid jobs found to match")
             return jsonify({'error': 'No valid jobs to match'}), 400
 
         results.sort(key=lambda x: x['score'], reverse=True)
+        app.logger.info(f"✅ Successfully matched and ranked {len(results)} jobs")
         return jsonify({'matches': results})
     except Exception as e:
         app.logger.error(f"Job matching error: {e}")
         return jsonify({'error': str(e)}), 500
 
-# 10. Application entry point
-if __name__ == '__main__':
-    # Production ready port, debug disabled for scalability
-    app.run(host='0.0.0.0', port=5001, debug=False)
-
 @app.route("/")
 def home():
     return jsonify({"message": "ML Project is running successfully!"})
+
+# 10. Application entry point
+if __name__ == '__main__':
+    # Bind to PORT environment variable if available (Render compatibility), fallback to 5001
+    port = int(os.environ.get("PORT", 5001))
+    app.logger.info(f"Starting ML application on port {port}...")
+    app.run(host='0.0.0.0', port=port, debug=False)
