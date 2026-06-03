@@ -116,7 +116,7 @@ def analytics_dashboard():
         # Growth predictions
         predictions = {}
         for job in jobs:
-            job_id = str(job.get('_id', ''))
+            job_id = str(job.get('_id') or job.get('id') or '')
             job_apps = apps_by_job.get(job_id, [])
             if len(job_apps) >= 2:
                 try:
@@ -222,7 +222,8 @@ def match_jobs():
                 continue
 
             results.append({
-                '_id': str(job.get('_id', 'N/A')),
+                '_id': str(job.get('_id') or job.get('id') or 'N/A'),
+                'id': str(job.get('id') or job.get('_id') or 'N/A'),
                 'title': job.get('title', 'Untitled'),
                 'description': job.get('description', ''),
                 'requiredSkills': job.get('requiredSkills', []),
