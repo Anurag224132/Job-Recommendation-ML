@@ -6,6 +6,7 @@ from functools import wraps
 from pathlib import Path
 
 # Load local .env file if it exists
+
 env_path = Path(__file__).parent / ".env"
 if env_path.exists():
     with open(env_path, "r") as f:
