@@ -5,7 +5,7 @@ import traceback
 from functools import wraps
 from pathlib import Path
 
-# Load local .env file if it exists
+# Load local .env file if it exist
 
 env_path = Path(__file__).parent / ".env"
 if env_path.exists():
