@@ -19,6 +19,7 @@ def test_batch_performance():
         ["java", "spring boot", "microservices"]
     ]
     
+    
     job_list_skills = base_job_skills * 100  # 500 jobs
     
     print(f"Starting batch matching for {len(job_list_skills)} jobs...")
